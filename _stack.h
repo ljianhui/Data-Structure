@@ -77,4 +77,9 @@ void _stack<T>::vist()const
 	}
 }
 
+void fun()
+{
+	return;
+}
+
 #endif // _STACK_H_INCLUDED
