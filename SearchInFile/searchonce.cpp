@@ -7,43 +7,47 @@ using namespace std;
 
 int IndexOf(const char *text, int textSize,
             const char *match, int matchSize);
-//×Ö·û´®Æ¥Åä£¬textÎªÎÄ±¾£¬matchÎªÄ£Ê½´®£¬·µ»ØÄ£Ê½´®µÚÒ»´Î³öÏÖµÄÎ»ÖÃ
+//å­—ç¬¦ä¸²åŒ¹é…ï¼Œtextä¸ºæ–‡æœ¬ï¼Œmatchä¸ºæ¨¡å¼ä¸²ï¼Œè¿”å›æ¨¡å¼ä¸²ç¬¬ä¸€æ¬¡å‡ºç°çš„ä½ç½®
+int IndexInFile(const char *fileName, const char *keyWord);
 int GetFileLength(ifstream &inputFile);
-//»ñµÃÎÄ¼şµÄ³¤¶È£¬¼´×Ö½ÚÊı
+//è·å¾—æ–‡ä»¶çš„é•¿åº¦ï¼Œå³å­—èŠ‚æ•°
 
 int main(int argc, char *argv[])
 {
     if(argc != 3)
     {
-        //ÊäÈëµÄ²ÎÊı¸öÊı²»ÕıÈ·£¬ÔòÍË³ö³ÌĞò
+        //è¾“å…¥çš„å‚æ•°ä¸ªæ•°ä¸æ­£ç¡®ï¼Œåˆ™é€€å‡ºç¨‹åº
         cerr<<"The count of parameters is ERROR!"<<endl;
         exit(EXIT_FAILURE);
     }
-    //ÒÔÖ»¶Á·½Ê½£¬´ò¿ªÎÄ¼şfileName
-    ifstream inputFile(argv[1]);
+    int index = IndexInFile(argv[1], argv[2]);
+    cout<<"The keyword: "<<argv[2]<<" , is in the location: "
+        <<index<<endl;
+    exit(EXIT_SUCCESS);
+}
+int IndexInFile(const char *fileName, const char *keyWord)
+{
+    //ä»¥åªè¯»æ–¹å¼ï¼Œæ‰“å¼€æ–‡ä»¶fileName
+    ifstream inputFile(fileName);
     if(!inputFile)
     {
-        //´ò¿ªÎÄ¼şÊ§°Ü
+        //æ‰“å¼€æ–‡ä»¶å¤±è´¥
         cerr<<"error: unable to open input file: "
-            <<argv[1]<<endl;
-        exit(EXIT_FAILURE);
+            <<fileName<<endl;
+        return -1;
     }
-    //»ñµÃÎÄ¼şµÄ³¤¶È£¬¼´×Ö½ÚÊı£¬²¢¿ªÅüÒ»¸öÍ¬Ñù´óĞ¡µÄÊı×é±£´æÎÄ¼şÊı¾İ
+    //è·å¾—æ–‡ä»¶çš„é•¿åº¦ï¼Œå³å­—èŠ‚æ•°ï¼Œå¹¶å¼€åŠˆä¸€ä¸ªåŒæ ·å¤§å°çš„æ•°ç»„ä¿å­˜æ–‡ä»¶æ•°æ®
     int length = GetFileLength(inputFile);
     char *text = new char[length+1];
-    //°ÑÎÄ¼şµÄÄÚÈİ½²µ½Êı×éÖĞ
+    //æŠŠæ–‡ä»¶çš„å†…å®¹è®²åˆ°æ•°ç»„ä¸­
     inputFile.read(text, length);
     inputFile.close();
     text[length] = '\0';
-    //½øĞĞÄ£Ê½´®Æ¥Åä£¬²¢Êä³ö½á¹û
-    int index = IndexOf(text, length, argv[2], strlen(argv[2]));
-    cout<<"The keyword: "<<argv[2]<<" , is in the location: "
-        <<index<<endl;
-
+    //è¿›è¡Œæ¨¡å¼ä¸²åŒ¹é…ï¼Œå¹¶è¿”å›ç»“æœ
+    int index = IndexOf(text, length, keyWord, strlen(keyWord));
     delete []text;
-    exit(EXIT_SUCCESS);
+    return index;
 }
-
 int IndexOf(const char *text, int textSize,
             const char *match, int matchSize)
 {
@@ -52,23 +56,23 @@ int IndexOf(const char *text, int textSize,
         int j = 0;
         while(j < matchSize && match[j] == text[i+j])
             ++j;
-        //ËùÓĞµÄ×Ö·û¶¼ÓëÎÄ±¾ÖĞµÄÒ»ÖÂ£¬ÔòÆ¥Åä³É¹¦
+        //æ‰€æœ‰çš„å­—ç¬¦éƒ½ä¸æ–‡æœ¬ä¸­çš„ä¸€è‡´ï¼Œåˆ™åŒ¹é…æˆåŠŸ
         if(j == matchSize)
             return i;
     }
-    //Æ¥ÅäÊ§°Ü
+    //åŒ¹é…å¤±è´¥
     return -1;
 }
 
 int GetFileLength(ifstream &inputFile)
 {
-    //±£´æÎÄ¼şµ±Ç°Î»ÖÃ
+    //ä¿å­˜æ–‡ä»¶å½“å‰ä½ç½®
     streampos pos = inputFile.tellg();
-    //¶¨Î»µ½ÎÄ¼şÎ²
+    //å®šä½åˆ°æ–‡ä»¶å°¾
     inputFile.seekg(0, ios::end);
-    //·µ»ØÎÄ¼şÎ²µÄÆ«ÒÆÁ¿£¬¼´ÎÄ¼şµÄ´óĞ¡
+    //è¿”å›æ–‡ä»¶å°¾çš„åç§»é‡ï¼Œå³æ–‡ä»¶çš„å¤§å°
     int length = inputFile.tellg();
-    //·µ»Øµ½ÎÄ¼şÏÈÇ°µÄÎ»ÖÃ
+    //è¿”å›åˆ°æ–‡ä»¶å…ˆå‰çš„ä½ç½®
     inputFile.seekg(pos);
     return length;
 }
