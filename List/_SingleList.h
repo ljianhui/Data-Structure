@@ -1,8 +1,10 @@
 #ifndef _SINGLELIST_H_INCLUDED
 #define _SINGLELIST_H_INCLUDED
 
-#define T int
+namespace nsList
+{
 
+template<typename T>
 class SingleNote
 {
 	public:
@@ -12,42 +14,44 @@ class SingleNote
     	SingleNote *pNext;
 };
 
+template<typename T>
 class _SingleList
 {
     public:
     	class Iterator
 		{
 			public:
-				Iterator(SingleNote *pT = NULL):pNote(pT){}
+				Iterator(SingleNote<T> *pT = NULL):pNote(pT){}
 				Iterator& operator++();//Ç°¼Ó
 				Iterator operator++(int);//ºó¼Ó
-				inline bool operator==(SingleNote *pT);
+				inline bool operator==(SingleNote<T> *pT);
 				inline bool operator==(const Iterator &it);
-				inline bool operator!=(SingleNote *pT);
+				inline bool operator!=(SingleNote<T> *pT);
 				inline bool operator!=(const Iterator &it);
-				const T* operator->()const
+				T* operator->()const
 				{
 				    return &(pNote->Obj);
 				}
-				const T& operator*()const
+				T& operator*()const
 				{
 				    return pNote->Obj;
 				}
 			private:
-				SingleNote *pNote;
+				SingleNote<T> *pNote;
 		};
 
 		_SingleList():pHead(NULL),pLast(NULL),length(0){}
         ~_SingleList();
 
-        SingleNote* begin(){return pHead;}
-        SingleNote* end()
+        SingleNote<T>* begin(){return pHead;}
+        SingleNote<T>* end()
         {
             if(pLast == NULL)
                 return NULL;
             return pLast->pNext;
         }
-        size_t size(){return length;}
+        bool IsEmpty(){return !length;}
+        size_t Size(){return length;}
         void Clear();
         T& Find(const T &obj);
         T& IndexOf(size_t index);
@@ -63,19 +67,20 @@ class _SingleList
 		void __SortUp();
 		void __SortDown();
 
-        SingleNote *pHead;
-        SingleNote *pLast;
+        SingleNote<T> *pHead;
+        SingleNote<T> *pLast;
         size_t length;
 };
 
-void _SingleList::__Destory(size_t begin, size_t end)
+template<typename T>
+void _SingleList<T>::__Destory(size_t begin, size_t end)
 {
     if(pHead == NULL)
     	return;
 
-	SingleNote *ptmpNext(pHead->pNext);
-    SingleNote *ptmpFront(pHead);
-    SingleNote *pBegin(NULL);   //É¾³ýµÄµÚÒ»¸ö½ÚµãµÄÇ°Çý,µ±begin>1Ê±£¬²ÅÓÐÐ§
+	SingleNote<T> *ptmpNext(pHead->pNext);
+    SingleNote<T> *ptmpFront(pHead);
+    SingleNote<T> *pBegin(NULL);   //É¾³ýµÄµÚÒ»¸ö½ÚµãµÄÇ°Çý,µ±begin>1Ê±£¬²ÅÓÐÐ§
 
     if(begin != 0)
     {
@@ -113,19 +118,22 @@ void _SingleList::__Destory(size_t begin, size_t end)
     length -= end - begin;
 }
 
-_SingleList::~_SingleList()
+template<typename T>
+_SingleList<T>::~_SingleList()
 {
     __Destory(0,length);
 }
 
-void _SingleList::Clear()
+template<typename T>
+void _SingleList<T>::Clear()
 {
     __Destory(0,length);
 }
 
-T& _SingleList::Find(const T &obj)
+template<typename T>
+T& _SingleList<T>::Find(const T &obj)
 {
-	SingleNote *ptmp(pHead);
+	SingleNote<T> *ptmp(pHead);
     for(size_t i = 0; i<length; ++i)
     {
         if(ptmp->Obj == obj)
@@ -135,14 +143,13 @@ T& _SingleList::Find(const T &obj)
     return pHead->Obj;
 }
 
-T& _SingleList::IndexOf(size_t index)
+template<typename T>
+T& _SingleList<T>::IndexOf(size_t index)
 {
 	if(length <= index)
         index = length - 1;
-    else if(index < 0)
-        index = 0;
 
-    SingleNote *ptmp(pHead);
+    SingleNote<T> *ptmp(pHead);
     for(size_t i = 0; i < index; ++i)
     {
         ptmp = ptmp->pNext;
@@ -150,15 +157,15 @@ T& _SingleList::IndexOf(size_t index)
     return ptmp->Obj;
 }
 
-
-void _SingleList::Insert(const T &obj,int index)
+template<typename T>
+void _SingleList<T>::Insert(const T &obj,int index)
 {
-	SingleNote *pObj(new SingleNote(obj));
+	SingleNote<T> *pObj(new SingleNote<T>(obj));
 
 	if(pHead != NULL)
 	{	//ÅÐ¶ÏÁ´±íÊÇ·ñÎª¿Õ
-		SingleNote *ptmp1(pHead);
-		SingleNote *ptmp2(NULL);
+		SingleNote<T> *ptmp1(pHead);
+		SingleNote<T> *ptmp2(NULL);
 
 		switch(index)
 		{
@@ -195,7 +202,8 @@ void _SingleList::Insert(const T &obj,int index)
 	++length;
 }
 
-void _SingleList::Remove(int begin, int end) //É¾³ýµÚbeginÖÁend-1¸öÔªËØ,´Ó0¿ªÊ¼
+template<typename T>
+void _SingleList<T>::Remove(int begin, int end) //É¾³ýµÚbeginÖÁend-1¸öÔªËØ,´Ó0¿ªÊ¼
 {
 	if(pHead == NULL)	//ÈôÁ´±íÊÇÒ»¸ö¿Õ±í£¬Ôò·µ»Ø
     	return;
@@ -206,24 +214,21 @@ void _SingleList::Remove(int begin, int end) //É¾³ýµÚbeginÖÁend-1¸öÔªËØ,´Ó0¿ªÊ¼
         begin = end;
         end = tmp;
     }
-    if(begin < 0||end < 1)
-    {
+    if(end < 1 ||begin == end || (begin >length-1 && begin>0))
+        return;     //²»ºÏ·¨µÄÊäÈë£¬Ôò·µ»Ø£¬×¢ÒâÎÞ·ûºÅÊýÓëÓÐ·ûºÅÊýµÄ±È½Ï
+    if(begin < 0)
         begin = 0;
-        end = 1;
-    }
-    else if(begin >= length)
-    {
-        begin = length - 1;
+    if(end > length)
         end = length;
-    }
 
     __Destory(begin,end);
 }
-void _SingleList::Remove(const T& obj)
+template<typename T>
+void _SingleList<T>::Remove(const T& obj)
 {
 	if(pHead == NULL)
         return;
-	SingleNote *pObj(pHead);
+	SingleNote<T> *pObj(pHead);
 
 	if(pObj->Obj == obj)	//ÈôÉ¾³ýµÄ½áµãÊÇÍ·½áµã
 	{
@@ -247,8 +252,8 @@ void _SingleList::Remove(const T& obj)
         return;
     }
 	//ÈôÉ¾³ýµÄ½áµã²»ÊÇÍ·Î²½áµã
-	SingleNote *ptmp1(pHead);
-	SingleNote *ptmp2(NULL);
+	SingleNote<T> *ptmp1(pHead);
+	SingleNote<T> *ptmp2(NULL);
 	pObj = pObj->pNext;
 
 	for(size_t i=1; i < length-1; ++i)
@@ -265,7 +270,8 @@ void _SingleList::Remove(const T& obj)
 	}
 }
 
-void _SingleList::Sort(int key)	//Ä¬ÈÏkey==0,´ÓÐ¡µ½´óÅÅÐò£¬Èôkey£¡=0,´Ó´óµ½Ð¡ÅÅÐò
+template<typename T>
+void _SingleList<T>::Sort(int key)	//Ä¬ÈÏkey==0,´ÓÐ¡µ½´óÅÅÐò£¬Èôkey£¡=0,´Ó´óµ½Ð¡ÅÅÐò
 {
 	if(!key)
 	{
@@ -278,15 +284,16 @@ void _SingleList::Sort(int key)	//Ä¬ÈÏkey==0,´ÓÐ¡µ½´óÅÅÐò£¬Èôkey£¡=0,´Ó´óµ½Ð¡ÅÅÐ
 
 
 }
-void _SingleList::__SortUp()
+template<typename T>
+void _SingleList<T>::__SortUp()
 {
     if(pHead == NULL || pHead->pNext == NULL)   //ÈôÁ´±íÖ»ÓÐ1¸ö½áµã»òÁ´±íÎª¿Õ£¬ÔòÎÞÐèÅÅÐò
         return;
 
     //ÏÈ´¦ÀíÍ·½áµã
-    SingleNote *pM(pHead);       //Ö¸Ïò×îÐ¡»ò×î´ó½áµã
-	SingleNote *pMf(pHead);		//×î´ó»ò×îÐ¡µÄ½áµãµÄÇ°Çý½áµã
-	SingleNote *ptmp(pHead);
+    SingleNote<T> *pM(pHead);       //Ö¸Ïò×îÐ¡»ò×î´ó½áµã
+	SingleNote<T> *pMf(pHead);		//×î´ó»ò×îÐ¡µÄ½áµãµÄÇ°Çý½áµã
+	SingleNote<T> *ptmp(pHead);
     for(size_t i=0; i<length-1; ++i)
     {
         if(pMf->Obj > ptmp->pNext->Obj)
@@ -303,7 +310,7 @@ void _SingleList::__SortUp()
         pHead = pM;
     }
     //´¦ÀíºóÐø½áµã
-    SingleNote *pMn; //Ö¸ÏòpMµÄºóÇý
+    SingleNote<T> *pMn; //Ö¸ÏòpMµÄºóÇý
     for(size_t i=1; i<length-1; ++i)
     {
         pMf = pM;
@@ -335,15 +342,16 @@ void _SingleList::__SortUp()
 
     pLast = pM->pNext;
 }
-void _SingleList::__SortDown()
+template<typename T>
+void _SingleList<T>::__SortDown()
 {
     if(pHead == NULL || pHead->pNext == NULL)   //ÈôÁ´±íÖ»ÓÐ1¸ö½áµã»òÁ´±íÎª¿Õ£¬ÔòÎÞÐèÅÅÐò
         return;
 
     //ÏÈ´¦ÀíÍ·½áµã
-    SingleNote *pM(pHead);       //Ö¸Ïò×îÐ¡»ò×î´ó½áµã
-	SingleNote *pMf(pHead);		//×î´ó»ò×îÐ¡µÄ½áµãµÄÇ°Çý½áµã
-	SingleNote *ptmp(pHead);
+    SingleNote<T> *pM(pHead);       //Ö¸Ïò×îÐ¡»ò×î´ó½áµã
+	SingleNote<T> *pMf(pHead);		//×î´ó»ò×îÐ¡µÄ½áµãµÄÇ°Çý½áµã
+	SingleNote<T> *ptmp(pHead);
     for(size_t i=0; i<length-1; ++i)
     {
         if(pMf->Obj < ptmp->pNext->Obj)
@@ -360,7 +368,7 @@ void _SingleList::__SortDown()
         pHead = pM;
     }
     //´¦ÀíºóÐø½áµã
-    SingleNote *pMn; //Ö¸ÏòpMµÄºóÇý
+    SingleNote<T> *pMn; //Ö¸ÏòpMµÄºóÇý
     for(size_t i=1; i<length-1; ++i)
     {
         pMf = pM;
@@ -393,14 +401,15 @@ void _SingleList::__SortDown()
     pLast = pM->pNext;
 }
 
-void _SingleList::DelRepeat()
+template<typename T>
+void _SingleList<T>::DelRepeat()
 {
     if(length == 0 || length == 1)
         return;
 
-    SingleNote *ptmp(pHead);
-    SingleNote *pObj(pHead);
-    SingleNote *pDel(NULL);
+    SingleNote<T> *ptmp(pHead);
+    SingleNote<T> *pObj(pHead);
+    SingleNote<T> *pDel(NULL);
 
     for(;pObj->pNext != NULL; pObj = pObj->pNext)
     {
@@ -423,14 +432,15 @@ void _SingleList::DelRepeat()
     pLast = pObj;
 }
 
-void _SingleList::Inverse()
+template<typename T>
+void _SingleList<T>::Inverse()
 {
     if(length < 2)  //ÈôÖ»ÓÐÒ»¸ö½Úµã»òÁ´±íÎª¿Õ£¬Ôò·µ»Ø
         return;
 
-    SingleNote *ptmp1(pHead);
-    SingleNote *ptmp2(ptmp1->pNext);
-    SingleNote *ptmp3(ptmp2->pNext);
+    SingleNote<T> *ptmp1(pHead);
+    SingleNote<T> *ptmp2(ptmp1->pNext);
+    SingleNote<T> *ptmp3(ptmp2->pNext);
 
     //ÉèÖÃÍ·Î²½áµã£¬²¢ÊµÏÖµÚÒ»´Î½»»»Ö¸Ïò
     pHead->pNext = NULL;
@@ -447,35 +457,42 @@ void _SingleList::Inverse()
     }
 }
 
-
-_SingleList::Iterator& _SingleList::Iterator::operator++()//Ç°¼Ó
+template<typename T>
+typename _SingleList<T>::Iterator& _SingleList<T>::Iterator::operator++()//Ç°¼Ó
 {
     pNote = pNote->pNext;
     return *this;
 }
-_SingleList::Iterator _SingleList::Iterator::operator++(int)//ºó¼Ó
+template<typename T>
+typename _SingleList<T>::Iterator _SingleList<T>::Iterator::operator++(int)//ºó¼Ó
 {
 	Iterator tmp(*this);
     pNote = pNote->pNext;
     return tmp;
 }
-bool _SingleList::Iterator::operator==(SingleNote *pT)
+template<typename T>
+bool _SingleList<T>::Iterator::operator==(SingleNote<T> *pT)
 {
 	bool flag(pNote == pT);
 	return flag;
 }
-bool _SingleList::Iterator::operator==(const Iterator &it)
+template<typename T>
+bool _SingleList<T>::Iterator::operator==(const Iterator &it)
 {
 	bool flag(it.pNote == pNote);
 	return flag;
 }
-bool _SingleList::Iterator::operator!=(SingleNote *pT)
+template<typename T>
+bool _SingleList<T>::Iterator::operator!=(SingleNote<T> *pT)
 {
 	return (!(*this == pT));
 }
-bool _SingleList::Iterator::operator!=(const Iterator &it)
+template<typename T>
+bool _SingleList<T>::Iterator::operator!=(const Iterator &it)
 {
 	return (!(*this==it));
 }
 
+}
+using nsList::_SingleList;
 #endif // _SINGLELIST_H_INCLUDED
