@@ -3,12 +3,9 @@
 #include <cstring>
 #include "_String.h"
 
-_String::_String():
-    ncapacity(10),
-    nlength(0),
-    pChar(new char[ncapacity+1])
+_String::_String()
 {
-    *pChar = '\0';
+    initString();
     //cout<<"_String()"<<endl;
 }
 
@@ -76,9 +73,28 @@ _String::~_String()
     delete []pChar;
     pChar = NULL;
 }
-
+bool _String::initString()
+{
+    //用于构造一个默认的字符串
+    int n = 10;
+    nlength = 0;
+    pChar = new char[n+1];
+    if(pChar == NULL)
+    {
+        ncapacity = 0;
+        return false;
+    }
+    else
+    {
+        ncapacity = n;
+        pChar[0] = '\0';
+        return true;
+    }
+}
 bool _String::resize()
 {
+    //重新分配字符数组，
+    //从表面上看就好像是pChar指向的数组自动在其后增加了一段空间一样
     int newsize = ncapacity * 2;
     char *ptmp = new char[newsize + 1];
     if(ptmp == NULL)
@@ -89,6 +105,21 @@ bool _String::resize()
     delete []pChar;
     pChar = ptmp;
     return true;
+}
+
+void _String::clear()
+{
+    //清空字符串，考虑到new操作的开销，
+    //如果内存占有太多，则回收其字符串内存，重新分配
+    //如果字符数组不是太大，则保留内存,设置字符串为空串
+    const int ADRISE_SIZE = 128;
+    if(ncapacity > ADRISE_SIZE)
+    {
+        delete []pChar;
+        initString();
+    }
+    else
+        pChar[0] = '\0';
 }
 char& _String::operator[](size_t index)
 {
@@ -129,13 +160,7 @@ bool _String::operator >(const _String &s)
 }
 _String& _String::operator +=(const _String &s)
 {
-    nlength += s.GetLength();
-    if(ncapacity < nlength)
-    {
-        ncapacity = nlength;
-        resize();
-    }
-    strcat(pChar,s.GetPtr());
+    return operator+=(s.GetPtr());
 }
 
 _String& _String::operator+=(const char *rhs)
@@ -143,10 +168,14 @@ _String& _String::operator+=(const char *rhs)
     nlength += strlen(rhs);
     if(ncapacity < nlength)
     {
+        //因为resize采用乘2的策略扩充内存，但是，不能保证
+        //ncapacity * 2 > nlength,
+        //所以在分配内存前，先设置ncapacity的值
         ncapacity = nlength;
         resize();
     }
     strcat(pChar, rhs);
+    return *this;
 }
 
 bool _String::operator <=(const _String &s)
@@ -174,12 +203,20 @@ ostream& operator << (ostream &os, const _String &s)
 
 istream& operator >> (istream &in, _String &s)
 {
-	char buffer[256];
+	const int BUFFER_SIZE = 256;
+	char buffer[BUFFER_SIZE];
+	s.clear();
+
 	do
 	{
-        in.get(buffer, 256);
+        //用于判断是否读完输入内容，因为如果还未读取的输入字符数大于buffer
+        //的容量，则buffer的最后一个字符会被get函数置为'\0'
+        buffer[BUFFER_SIZE - 1] = '#';
+		in.get(buffer, BUFFER_SIZE);
         s += buffer;
-	}while(in);
+	}while(buffer[BUFFER_SIZE - 1] == '\0');
+	in.get();
+
 	return in;
 }
 
@@ -189,7 +226,6 @@ _String operator +(const _String &lhs, const _String &rhs)
     stemp += rhs;
     return stemp;
 }
-
 
 
 

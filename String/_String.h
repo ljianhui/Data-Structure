@@ -1,9 +1,6 @@
 #ifndef _STRING_H_INCLUDED
 #define _STRING_H_INCLUDED
 
-#include <ostream>
-#include <istream>
-
 using std::ostream;
 using std::istream;
 
@@ -28,12 +25,14 @@ class _String
         bool operator >=(const _String &s);
         _String& operator+=(const _String &rhs);
         _String& operator+=(const char *rhs);
+        void clear();
         size_t GetLength()const {return nlength;}
         size_t GetCapacity()const {return ncapacity;}
         char* GetPtr()const {return pChar;}
 
     private:
         bool resize();
+        bool initString();
         size_t ncapacity;
         size_t nlength;
         char *pChar;
