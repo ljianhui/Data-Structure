@@ -141,7 +141,7 @@ bool _String::resize(int newsize)
     char *ptmp = new char[newsize + 1];
     if(ptmp == NULL)
         return false;
-
+    //要分配内存成功后才能改变ncapacity的值
     ncapacity = newsize;
     strcpy(ptmp, pChar);
     delete []pChar;
@@ -154,14 +154,13 @@ bool _String::addAssign(const char *data, int data_size)
     int len = nlength + data_size;
     if(ncapacity < len)
     {
-        //因为resize采用乘2的策略扩充内存，但是，不能保证
-        //ncapacity * 2 > len,
-        //所以在分配内存前，先设置ncapacity的值
+        //将数组的大小扩充为len的2倍
         if(resize(2 * len) == false)
             return false;
     }
-    nlength = len;
     strcat(pChar, data);
+    //要连接成功后，才能增加nlength的值
+    nlength = len;
     return true;
 }
 _String& _String::operator +=(const _String &s)
@@ -216,7 +215,7 @@ ostream& operator << (ostream &os, const _String &s)
 
 istream& operator >> (istream &in, _String &s)
 {
-	const int BUFFER_SIZE = 6;
+	const int BUFFER_SIZE = 256;
 	char buffer[BUFFER_SIZE];
 	s.clear();
 
