@@ -3,10 +3,32 @@
 #include <cstring>
 #include "_String.h"
 
+//#include <iostream>
+//using namespace std;
+
 _String::_String()
 {
     initString();
     //cout<<"_String()"<<endl;
+}
+
+bool _String::initString()
+{
+    //用于构造一个默认的字符串
+    int n = 10;
+    nlength = 0;
+    pChar = new char[n+1];
+    if(pChar == NULL)
+    {
+        ncapacity = 0;
+        return false;
+    }
+    else
+    {
+        ncapacity = n;
+        pChar[0] = '\0';
+        return true;
+    }
 }
 
 _String::_String(const char *pc, size_t len)
@@ -39,32 +61,31 @@ _String::_String(const _String &s)
     //cout<<"_String(const _String &s)"<<endl;
 }
 
-_String& _String::operator=(const _String &s)
+bool _String::assign(const char *data, int data_size)
 {
-    nlength = s.GetLength();
-    if(ncapacity < nlength)
+    if(ncapacity < data_size)
     {
         delete []pChar;
-        ncapacity = nlength * 2;
+        int n = data_size * 2;
 
-        pChar = new char[ncapacity + 1];
+        pChar = new char[n + 1];
+        if(pChar == NULL)
+            return false;
+        ncapacity = n;
     }
-    strcpy(pChar,s.GetPtr());
-    //cout<<"_String::operator=(const _String &s)"<<endl;
+    nlength = data_size;
+    strcpy(pChar, data);
+    return true;
+}
+_String& _String::operator=(const _String &s)
+{
+    assign(s.GetPtr(), s.GetLength());
     return *this;
 }
 
 _String& _String::operator=(const char *s)
 {
-    nlength = strlen(s);
-    if(ncapacity < nlength)
-    {
-        delete []pChar;
-        ncapacity = nlength * 2;
-
-        pChar = new char[ncapacity + 1];
-    }
-    strcpy(pChar, s);
+    assign(s, strlen(s));
     return *this;
 }
 
@@ -73,54 +94,8 @@ _String::~_String()
     delete []pChar;
     pChar = NULL;
 }
-bool _String::initString()
-{
-    //用于构造一个默认的字符串
-    int n = 10;
-    nlength = 0;
-    pChar = new char[n+1];
-    if(pChar == NULL)
-    {
-        ncapacity = 0;
-        return false;
-    }
-    else
-    {
-        ncapacity = n;
-        pChar[0] = '\0';
-        return true;
-    }
-}
-bool _String::resize()
-{
-    //重新分配字符数组，
-    //从表面上看就好像是pChar指向的数组自动在其后增加了一段空间一样
-    int newsize = ncapacity * 2;
-    char *ptmp = new char[newsize + 1];
-    if(ptmp == NULL)
-        return false;
 
-    ncapacity = newsize;
-    strcpy(ptmp, pChar);
-    delete []pChar;
-    pChar = ptmp;
-    return true;
-}
 
-void _String::clear()
-{
-    //清空字符串，考虑到new操作的开销，
-    //如果内存占有太多，则回收其字符串内存，重新分配
-    //如果字符数组不是太大，则保留内存,设置字符串为空串
-    const int ADRISE_SIZE = 128;
-    if(ncapacity > ADRISE_SIZE)
-    {
-        delete []pChar;
-        initString();
-    }
-    else
-        pChar[0] = '\0';
-}
 char& _String::operator[](size_t index)
 {
     if(index > nlength)
@@ -158,23 +133,46 @@ bool _String::operator >(const _String &s)
     else
         return false;
 }
+
+bool _String::resize(int newsize)
+{
+    //重新分配字符数组，
+    //从表面上看就好像是pChar指向的数组自动在其后增加了一段空间一样
+    char *ptmp = new char[newsize + 1];
+    if(ptmp == NULL)
+        return false;
+
+    ncapacity = newsize;
+    strcpy(ptmp, pChar);
+    delete []pChar;
+    pChar = ptmp;
+    return true;
+}
+
+bool _String::addAssign(const char *data, int data_size)
+{
+    int len = nlength + data_size;
+    if(ncapacity < len)
+    {
+        //因为resize采用乘2的策略扩充内存，但是，不能保证
+        //ncapacity * 2 > len,
+        //所以在分配内存前，先设置ncapacity的值
+        if(resize(2 * len) == false)
+            return false;
+    }
+    nlength = len;
+    strcat(pChar, data);
+    return true;
+}
 _String& _String::operator +=(const _String &s)
 {
-    return operator+=(s.GetPtr());
+    addAssign(s.GetPtr(), s.GetLength());
+    return *this;
 }
 
 _String& _String::operator+=(const char *rhs)
 {
-    nlength += strlen(rhs);
-    if(ncapacity < nlength)
-    {
-        //因为resize采用乘2的策略扩充内存，但是，不能保证
-        //ncapacity * 2 > nlength,
-        //所以在分配内存前，先设置ncapacity的值
-        ncapacity = nlength;
-        resize();
-    }
-    strcat(pChar, rhs);
+    addAssign(rhs, strlen(rhs));
     return *this;
 }
 
@@ -194,6 +192,21 @@ bool _String::operator >=(const _String &s)
 		return false;
 }
 
+void _String::clear()
+{
+    //清空字符串，考虑到new操作的开销，
+    //如果内存占有太多，则回收其字符串内存，重新分配
+    //如果字符数组不是太大，则保留内存,设置字符串为空串
+    const int ADRISE_SIZE = 128;
+    if(ncapacity > ADRISE_SIZE)
+    {
+        delete []pChar;
+        initString();
+    }
+    else
+        pChar[0] = '\0';
+}
+
 ostream& operator << (ostream &os, const _String &s)
 {
 	os<<s.GetPtr();
@@ -203,7 +216,7 @@ ostream& operator << (ostream &os, const _String &s)
 
 istream& operator >> (istream &in, _String &s)
 {
-	const int BUFFER_SIZE = 256;
+	const int BUFFER_SIZE = 6;
 	char buffer[BUFFER_SIZE];
 	s.clear();
 
@@ -227,23 +240,13 @@ _String operator +(const _String &lhs, const _String &rhs)
     return stemp;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//int main()
+//{
+//    _String s;
+//    cin >> s;
+//    _String s1;
+//    cin >> s1;
+//
+//    s = s1;
+//    cout << s << endl;
+//}

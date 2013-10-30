@@ -31,8 +31,10 @@ class _String
         char* GetPtr()const {return pChar;}
 
     private:
-        bool resize();
+        bool resize(int newsize);
         bool initString();
+        bool assign(const char *data, int data_size);
+        bool addAssign(const char *data, int data_size);
         size_t ncapacity;
         size_t nlength;
         char *pChar;
