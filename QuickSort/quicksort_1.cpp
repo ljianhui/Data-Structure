@@ -35,7 +35,7 @@ void QSort(DataType *data, int left, int right)
     DataType centre = data[right];
     int i = left;
     int j = right-1;
-    while(i < j)
+    while(true)
     {
         //从前向后扫描，找到第一个小于枢纽的值，
         //在到达数组末尾前，必定结果循环,因为最后一个值为centre
@@ -46,7 +46,9 @@ void QSort(DataType *data, int left, int right)
             --j;
         //如果没有完成一趟交换，则交换
         if(i < j)
-            Swap(data[i], data[j]);
+            Swap(data[i++], data[j--]);
+        else
+            break;
     }
     //把枢纽放在正确的位置
     Swap(data[i], data[right]);
