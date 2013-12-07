@@ -333,10 +333,12 @@ void DestoryList(List *list)
     {
         //循环删除结点
         tmp = node->next;
+        free(node->data);
         free(node);
         node = tmp;
     }
     //删除最后一个结点
+    free(end->data);
     free(end);
     list->head = NULL;
     list->length = 0;

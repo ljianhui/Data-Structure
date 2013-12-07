@@ -84,5 +84,4 @@ Iterator Last(Iterator *it);
 //通过迭代器it获得数据，相当于*p
 void* GetData(Iterator it);
 
-
 #endif // LIST_H_INCLUDED
