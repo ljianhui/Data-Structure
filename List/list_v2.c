@@ -37,7 +37,7 @@ int InitList(List *list, int data_size)
 }
 
 Iterator Append(List *list, void *data,
-                void (*assign)(const void*, const void*))
+                void (*assign)(void*, const void*))
 {
     /***
     函数功能：把data的内容插入到链表list的末尾
@@ -138,7 +138,7 @@ Node* NewNode(int data_size)
 }
 
 Iterator Insert(List *list, void *data, Iterator it_before,
-                void (*assign)(const void*, const void*))
+                void (*assign)(void*, const void*))
 {
     /***
     函数功能：把data的内容插入到链表list的迭代器it_before的前面
@@ -188,7 +188,10 @@ int Remove(List *list, Iterator it)
     //把结点it从list中分离
     int n = RemoveNode(list, it);
     if(n != -1)
+    {
+        free(it->data);
         free(it);//free掉node结点
+    }
     return n;
 }
 
@@ -384,5 +387,15 @@ void* GetData(Iterator it)
     函数功能：通过迭代器it获得数据，相当于*p
     ***/
     return it->data;
+}
+
+Iterator GetNext(Iterator it)
+{
+    return it->next;
+}
+
+Iterator GetLast(Iterator it)
+{
+    return it->last;
 }
 

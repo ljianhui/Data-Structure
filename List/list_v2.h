@@ -21,12 +21,12 @@ int InitList(List *list, int data_size);
 //把data的内容插入到链表list的末尾
 //assign指定数据data间的赋值方法
 Iterator Append(List *list, void *data,
-                void (*assign)(const void*, const void*));
+                void (*assign)(void*, const void*));
 
 //把data的内容插入到链表的迭代器it_before的前面
 //assign指定数据data间的赋值方法
 Iterator Insert(List *list, void *data, Iterator it_before,
-                void (*assign)(const void*, const void*));
+                void (*assign)(void*, const void*));
 
 //把链表A中迭代器it_a指向的结点移动到链表B中迭代器it_b_befroe的前面
 Iterator MoveFromAtoB(List *A, Iterator it_a,
@@ -83,5 +83,9 @@ Iterator Next(Iterator *it);
 Iterator Last(Iterator *it);
 //通过迭代器it获得数据，相当于*p
 void* GetData(Iterator it);
+
+Iterator GetNext(Iterator it);
+
+Iterator GetLast(Iterator it);
 
 #endif // LIST_H_INCLUDED
