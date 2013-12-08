@@ -2,41 +2,57 @@
 #include <stdlib.h>
 #include "list_v2.h"
 
-struct node
+typedef struct node
 {
     //循环双链表的结点结构
     void* data;//数据域指针
     struct node *next;//指向当前结点的下一结点
     struct node *last;//指向当前结点的上一结点
+}Node;
+
+struct list
+{
+    struct node *head;//头指针，指向头结点
+    int data_size;//链表对应的数据所占内存的大小
+    int length;//链表list的长度
 };
 
-Node* Position(List *list, int index);
+Node* Position(List list, int index);
 Node* NewNode(int data_size);
-void LinkNodeToList(List *list, Node *node, Node *next_node);
-int RemoveNode(List *list, Node *node);
+void LinkNodeToList(List list, Node *node, Node *next_node);
+int RemoveNode(List list, Node *node);
 
-int InitList(List *list, int data_size)
+int InitList(List *list_ptr, int data_size)
 {
     /***
     函数功能：初始化链表,数据域所占内存的大小由data_size给出
     ***/
 
+    List new_list = (List)malloc(sizeof(struct list));
+    *list_ptr = new_list;
+    if(new_list == NULL)
+        return -1;
+
     Node *node = (Node*)malloc(sizeof(Node));
     if(node == NULL)
+    {
+        free(new_list);
+        *list_ptr = NULL;
         return -1;
+    }
     //把头结点的数据域指针置为空
     node->data = NULL;
     //使其指针指向自身
     node->next = node;
     node->last = node;
     //设置list的头指针、数据所占内存的大小和长度
-    list->head = node;
-    list->data_size = data_size;
-    list->length = 0;
+    (*list_ptr)->head = node;
+    (*list_ptr)->data_size = data_size;
+    (*list_ptr)->length = 0;
     return 0;
 }
 
-Iterator Append(List *list, void *data,
+Iterator Append(List list, void *data,
                 void (*assign)(void*, const void*))
 {
     /***
@@ -48,7 +64,7 @@ Iterator Append(List *list, void *data,
     return Insert(list, data, End(list), assign);
 }
 
-void LinkNodeToList(List *list, Node *node, Node *next_node)
+void LinkNodeToList(List list, Node *node, Node *next_node)
 {
     /***
     函数功能：把node连接到next_node之前
@@ -65,7 +81,7 @@ void LinkNodeToList(List *list, Node *node, Node *next_node)
     ++list->length;
 }
 
-int RemoveNode(List *list, Node *node)
+int RemoveNode(List list, Node *node)
 {
     /***
     函数功能：从list中，移除node结点，但并不free
@@ -83,7 +99,7 @@ int RemoveNode(List *list, Node *node)
     return 0;
 }
 
-Node* Position(List *list, int index)
+Node* Position(List list, int index)
 {
     /***
     函数功能：返回第index个结点的指针
@@ -137,7 +153,7 @@ Node* NewNode(int data_size)
     return node;
 }
 
-Iterator Insert(List *list, void *data, Iterator it_before,
+Iterator Insert(List list, void *data, Iterator it_before,
                 void (*assign)(void*, const void*))
 {
     /***
@@ -163,8 +179,8 @@ Iterator Insert(List *list, void *data, Iterator it_before,
     return node;
 }
 
-Iterator MoveFromAtoB(List *A, Iterator it_a,
-                      List *B, Iterator it_b_before)
+Iterator MoveFromAtoB(List A, Iterator it_a,
+                      List B, Iterator it_b_before)
 {
     /***
     函数功能：把链表A中迭代器it_a指向的结点移动到
@@ -179,7 +195,7 @@ Iterator MoveFromAtoB(List *A, Iterator it_a,
     return it_a;
 }
 
-int Remove(List *list, Iterator it)
+int Remove(List list, Iterator it)
 {
     /***
     函数功能：删除链表list中迭代器it指向的结点
@@ -195,7 +211,7 @@ int Remove(List *list, Iterator it)
     return n;
 }
 
-int RemoveFirst(List *list)
+int RemoveFirst(List list)
 {
     /***
     函数功能：删除链表list的第0个结点，下标从0开始
@@ -203,7 +219,7 @@ int RemoveFirst(List *list)
     return Remove(list, Begin(list));
 }
 
-int RemoveLast(List *list)
+int RemoveLast(List list)
 {
     /***
     函数功能：删除链表list的最后一个结点
@@ -211,7 +227,7 @@ int RemoveLast(List *list)
     return Remove(list, End(list));
 }
 
-void* At(List *list, int index)
+void* At(List list, int index)
 {
     /***
     函数功能：返回list中第index个数据的指针
@@ -246,7 +262,7 @@ Iterator FindFirst(Iterator begin, Iterator end, void *data,
     return begin;
 }
 
-int IndexOf(List *list, void *data,
+int IndexOf(List list, void *data,
             int (*equal)(const void*,const void*))
 {
     /***
@@ -308,7 +324,7 @@ Iterator GetMax(Iterator begin, Iterator end,
     return max;
 }
 
-int GetLength(List *list)
+int GetLength(List list)
 {
     /***
     函数功能：获取list的长度
@@ -316,7 +332,7 @@ int GetLength(List *list)
     return list->length;
 }
 
-int IsEmpty(List *list)
+int IsEmpty(List list)
 {
     /***
     函数功能：若list为空链表，则返回1，否则返回0
@@ -324,13 +340,13 @@ int IsEmpty(List *list)
     return !(list->length);
 }
 
-void DestoryList(List *list)
+void DestroyList(List *list_ptr)
 {
     /***
     函数功能：销毁链表list
     ***/
-    Node *node = list->head;//指向头结点
-    Node *end = list->head->last;//指向尾结点
+    Node *node = (*list_ptr)->head->next;//指向第0个结点
+    Node *end = (*list_ptr)->head;//指向尾结点
     Node *tmp = NULL;//用于保存被free的结点的下一个结点
     while(node != end)
     {
@@ -340,14 +356,13 @@ void DestoryList(List *list)
         free(node);
         node = tmp;
     }
-    //删除最后一个结点
-    free(end->data);
+    //删除头结点
     free(end);
-    list->head = NULL;
-    list->length = 0;
+    free(*list_ptr);
+    *list_ptr = NULL;
 }
 
-Iterator Begin(List *list)
+Iterator Begin(List list)
 {
     /***
     函数功能：获得list的首迭代器
@@ -355,7 +370,7 @@ Iterator Begin(List *list)
     return list->head->next;
 }
 
-Iterator End(List *list)
+Iterator End(List list)
 {
     /***
     函数功能：获得list的尾迭代器，指向最后一个元素的下一个位置
