@@ -26,6 +26,7 @@ int InitList(List *list_ptr, int data_size)
 {
     /***
     函数功能：初始化链表,数据域所占内存的大小由data_size给出
+    返回：成功返回0，失败返回-1
     ***/
 
     List new_list = (List)malloc(sizeof(struct list));
@@ -58,6 +59,7 @@ Iterator Append(List list, void *data,
     /***
     函数功能：把data的内容插入到链表list的末尾
         assign指定数据data间的赋值方法
+    返回：插入到list中的结点的迭代器
     ***/
 
     //调用Insert函数实现，插入位置为end
@@ -68,6 +70,7 @@ void LinkNodeToList(List list, Node *node, Node *next_node)
 {
     /***
     函数功能：把node连接到next_node之前
+    返回：无
     ***/
     Node *last_node = next_node->last;
     //把node连接入list中
@@ -86,6 +89,7 @@ int RemoveNode(List list, Node *node)
     /***
     函数功能：从list中，移除node结点，但并不free
         注意，并不free结点，只是把结点从链中分离
+    返回：成功返回0，失败返回-1
     ***/
     if(node == list->head)
         return -1;//不移除头结点
@@ -102,7 +106,8 @@ int RemoveNode(List list, Node *node)
 Node* Position(List list, int index)
 {
     /***
-    函数功能：返回第index个结点的指针
+    函数功能：查找第index个结点的指针
+    返回：第index个结点的指针
     ***/
     Node *node = NULL;
     int i = 0;
@@ -135,6 +140,7 @@ Node* NewNode(int data_size)
         结点由两部分组成，一部分是结点本身，
         一部分为data指针指向的数据域空间
         数据所占的内存空间由参数data_size给出
+    返回：新建结点的指针，创建结点失败，返回NULL
     ***/
 
     //创建结点，若创建失败，返回NULL
@@ -145,7 +151,7 @@ Node* NewNode(int data_size)
     void *data = malloc(data_size);
     if(data == NULL)
     {
-        free(node);
+        free(node);//释放之前分配的内存
         return NULL;
     }
     //使结点的数据域指针指向数据域空间，并返回结点的指针
@@ -159,6 +165,7 @@ Iterator Insert(List list, void *data, Iterator it_before,
     /***
     函数功能：把data的内容插入到链表list的迭代器it_before的前面
         assign指定数据data间的赋值方法
+    返回：插入到list中的结点的迭代器
     ***/
 
     //从内存中开辟一个结点的空间
@@ -185,6 +192,7 @@ Iterator MoveFromAtoB(List A, Iterator it_a,
     /***
     函数功能：把链表A中迭代器it_a指向的结点移动到
               链表B中迭代器it_b_befroe的前面
+    返回：移到到链表B中的结点的迭代器
     ***/
 
     //把结点a从A链中分享
@@ -199,6 +207,7 @@ int Remove(List list, Iterator it)
 {
     /***
     函数功能：删除链表list中迭代器it指向的结点
+    返回：成功返回0，失败返回-1
     ***/
 
     //把结点it从list中分离
@@ -215,6 +224,7 @@ int RemoveFirst(List list)
 {
     /***
     函数功能：删除链表list的第0个结点，下标从0开始
+    返回：成功返回0，失败返回-1
     ***/
     return Remove(list, Begin(list));
 }
@@ -223,6 +233,7 @@ int RemoveLast(List list)
 {
     /***
     函数功能：删除链表list的最后一个结点
+    返回：成功返回0，失败返回-1
     ***/
     return Remove(list, End(list));
 }
@@ -230,9 +241,13 @@ int RemoveLast(List list)
 void* At(List list, int index)
 {
     /***
-    函数功能：返回list中第index个数据的指针
+    函数功能：查找list中第index个数据的指针
+    返回：第index个结点的数据的指针
     ***/
 
+    //下标越界（从0开始），返回NULL
+    if(index >= list->length || index < 0)
+        return NULL;
     //获得第index个结点的指针
     Node *node = Position(list, index);
     if(node != list->head)
@@ -248,6 +263,7 @@ Iterator FindFirst(Iterator begin, Iterator end, void *data,
       比较函数由condition指向,比较的值由data指向
       当第一个参数的值小于第二个参数的值时，返回1，否则返回0
       根据condition函数的不同，可以查找第一个相等、大于或小于data的值
+    返回：begin和end之间符合condition的第一个元素的迭代器
     ***/
     while(begin != end)
     {
@@ -268,6 +284,7 @@ int IndexOf(List list, void *data,
     /***
     函数功能：查找list中第一个与data相等的元素的下标，
         equal函数，当第一个参数与第二个参数的值相等时，返回1，否则返回0
+    返回：list中第一个与data相等的元素的下标
     ***/
     Node *node = list->head->next;//指向第0个结点
     int i = 0;
@@ -289,6 +306,7 @@ Iterator GetMin(Iterator begin, Iterator end,
     /***
     函数功能：查找在begin和end之间的最小值，比较函数由less指向
         当第一个参数的值小于第二个参数的值时，返回1，否则返回0
+    返回：begin和end之间的最小值的迭代器
     ***/
     Iterator min = begin; //用于记录最小的元素的迭代器
     Next(&begin);
@@ -310,6 +328,7 @@ Iterator GetMax(Iterator begin, Iterator end,
     /***
     函数功能：查找在begin和end之间的最大值，比较函数由large指向
         当第一个参数的值大于第二个参数的值时，返回1，否则返回0
+    返回：begin和end之间的最小值的迭代器
     ***/
     Iterator max = begin;//用于记录最大的元素的迭代器
     Next(&begin);
@@ -328,6 +347,7 @@ int GetLength(List list)
 {
     /***
     函数功能：获取list的长度
+    返回：list的结点个数
     ***/
     return list->length;
 }
@@ -335,7 +355,8 @@ int GetLength(List list)
 int IsEmpty(List list)
 {
     /***
-    函数功能：若list为空链表，则返回1，否则返回0
+    函数功能：判断list是否为空
+    返回：若list为空链表，则返回1，否则返回0
     ***/
     return !(list->length);
 }
@@ -344,6 +365,7 @@ void DestroyList(List *list_ptr)
 {
     /***
     函数功能：销毁链表list
+    返回：无
     ***/
     Node *node = (*list_ptr)->head->next;//指向第0个结点
     Node *end = (*list_ptr)->head;//指向尾结点
@@ -366,6 +388,7 @@ Iterator Begin(List list)
 {
     /***
     函数功能：获得list的首迭代器
+    返回：list的第0个结点的地址，即首迭代器
     ***/
     return list->head->next;
 }
@@ -374,6 +397,7 @@ Iterator End(List list)
 {
     /***
     函数功能：获得list的尾迭代器，指向最后一个元素的下一个位置
+    返回：list的尾迭代器
     ***/
     return list->head;
 }
@@ -381,7 +405,8 @@ Iterator End(List list)
 Iterator Next(Iterator *it)
 {
     /***
-    函数功能：使it指向下一个位置，并返回指向下一个位置后的迭代器
+    函数功能：使it指向下一个位置
+    返回：指向下一个位置后的迭代器
     ***/
     (*it) = (*it)->next;
     return *it;
@@ -390,7 +415,8 @@ Iterator Next(Iterator *it)
 Iterator Last(Iterator *it)
 {
     /***
-    函数功能：使it指向上一个位置，并返回指向上一个位置后的迭代器
+    函数功能：使it指向上一个位置
+    返回：指向上一个位置后的迭代器
     ***/
     (*it) = (*it)->last;
     return *it;
@@ -400,17 +426,28 @@ void* GetData(Iterator it)
 {
     /***
     函数功能：通过迭代器it获得数据，相当于*p
+    返回：数据指针
     ***/
     return it->data;
 }
 
 Iterator GetNext(Iterator it)
 {
+    /***
+    函数功能：
+    获取当前迭代器的下一个迭代器，注意，并不改变当前迭代器
+    返回：当前迭代器的下一个迭代器
+    ***/
     return it->next;
 }
 
 Iterator GetLast(Iterator it)
 {
+    /***
+    函数功能：
+    获取当前迭代器的上一个迭代器，注意，并不改变当前迭代器
+    返回：当前迭代器的下一个迭代器
+    ***/
     return it->last;
 }
 

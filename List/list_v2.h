@@ -1,13 +1,14 @@
 #ifndef LIST_V2_H_INCLUDED
 #define LIST_V2_H_INCLUDED
 
-//循环双链表，带头结点，结点下标从0开始，头结点不计入下标值
+//泛型循环双链表，带头结点，结点下标从0开始，头结点不计入下标值
 
 //定义结点指针Node*为List类型的迭代器
 typedef struct node* Iterator;
 
 //List类型的定义
 typedef struct list* List;
+
 //初始化链表,数据域所占内存的大小由data_size给出
 int InitList(List *list, int data_size);
 
@@ -68,17 +69,23 @@ void DestroyList(List *list);
 
 //获得list的首迭代器
 Iterator Begin(List list);
+
 //获得list的尾迭代器，指向最后一个元素的下一个位置
 Iterator End(List list);
+
 //使it指向下一个位置，并返回指向下一个位置后的迭代器
 Iterator Next(Iterator *it);
+
 //使it指向上一个位置，并返回指向上一个位置后的迭代器
 Iterator Last(Iterator *it);
+
 //通过迭代器it获得数据，相当于*p
 void* GetData(Iterator it);
 
+//获取当前迭代器的下一个迭代器，注意，并不改变当前迭代器
 Iterator GetNext(Iterator it);
 
+//获取当前迭代器的上一个迭代器，注意，并不改变当前迭代器
 Iterator GetLast(Iterator it);
 
 #endif // LIST_H_INCLUDED
