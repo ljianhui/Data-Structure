@@ -3,6 +3,9 @@
 #include <cstring>
 #include "_String.h"
 
+using std::ostream;
+using std::istream;
+
 //#include <iostream>
 //using namespace std;
 
@@ -215,7 +218,7 @@ ostream& operator << (ostream &os, const _String &s)
 
 istream& operator >> (istream &in, _String &s)
 {
-	const int BUFFER_SIZE = 256;
+	const int BUFFER_SIZE = 6;
 	char buffer[BUFFER_SIZE];
 	s.clear();
 

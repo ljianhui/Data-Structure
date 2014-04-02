@@ -1,9 +1,6 @@
 #ifndef _STRING_H_INCLUDED
 #define _STRING_H_INCLUDED
 
-using std::ostream;
-using std::istream;
-
 class _String
 {
     public:
@@ -16,7 +13,7 @@ class _String
         _String& operator=(const char *s);
         ~_String();
 
-        char& operator[](const size_t index);
+        char& operator[](size_t index);
         bool operator ==(const _String &s);
         bool operator !=(const _String &s);
         bool operator <(const _String &s);
@@ -41,7 +38,7 @@ class _String
 };
 
 _String operator+(const _String &lhs, const _String &rhs);
-ostream& operator <<(ostream &os, const _String &s);
-istream& operator >>(istream &in, _String &s);
+std::ostream& operator <<(std::ostream &os, const _String &s);
+std::istream& operator >>(std::istream &in, _String &s);
 
 #endif // _STRING_H_INCLUDED
