@@ -25,12 +25,16 @@ String::String(const String &s):
 
 String::String(const char *cstr)
 {
+    if(cstr == NULL)
+        return;
     size_t len = strlen(cstr);
     _initString(cstr, len);
 }
 
 String::String(const char *cstr, size_t len)
 {
+    if(cstr == NULL)
+        return;
     size_t str_len = strlen(cstr);
     if(len <= str_len)
     {
@@ -102,7 +106,7 @@ void String::_initString(const char *cstr, size_t len)
 void String::_decUsed()
 {
     --*_used;
-    if(_used == 0)
+    if(*_used == 0)
     {
         if(_cstr != NULL)
         {
@@ -179,7 +183,7 @@ ostream& operator << (ostream &os, const String &s)
 
 istream& operator >> (istream &in, String &s)
 {
-	const int BUFFER_SIZE = 6;
+	const int BUFFER_SIZE = 256;
 	char buffer[BUFFER_SIZE];
 	char *end = buffer + BUFFER_SIZE -1;
 	s.clear();
