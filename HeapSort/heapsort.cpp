@@ -71,5 +71,7 @@ int main()
     HeapSort(data, size);
     for(int i = 0; i < size; ++i)
         cout << data[i] << " ";
+
+    delete[] data;
     return 0;
 }
