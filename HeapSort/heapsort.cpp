@@ -13,7 +13,7 @@ void HeapSort(DataType *data, int data_size);
 
 inline int LeftChild(int i)
 {
-    return (i<<1)+1;
+    return 2*i+1;
 }
 
 inline void Swap(DataType &x, DataType &y)
@@ -62,18 +62,15 @@ void HeapSort(DataType *data, int data_size)
 int main()
 {
     srand(NULL);
-    const int size =  128 * 1024 * 1024;
+    const int size =  11;
     DataType *data = new DataType[size];
     for(int i = 0; i < size; ++i)
     {
-        data[i] = rand();
+        data[i] = rand() % 100;
     }
-    int begin = time(NULL);
     HeapSort(data, size);
-    int end = time(NULL);
-    cout << end - begin << endl;
-//    for(int i = 0; i < size; ++i)
-//        cout << data[i] << " ";
+    for(int i = 0; i < size; ++i)
+        cout << data[i] << " ";
 
     delete[] data;
     return 0;
